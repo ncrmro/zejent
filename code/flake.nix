@@ -167,6 +167,11 @@
               chmod 1777 tmp
             '';
             config = {
+              Labels = {
+                # GHCR links the published package to this repo via the source
+                # label, letting repo-scoped GITHUB_TOKEN pushes reach it.
+                "org.opencontainers.image.source" = "https://github.com/ncrmro/zejent";
+              };
               Cmd = [ "/bin/agent-zellij" ];
               WorkingDir = "/workspace";
               Env = [
