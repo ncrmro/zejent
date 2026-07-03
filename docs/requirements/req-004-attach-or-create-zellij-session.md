@@ -1,0 +1,3 @@
+# REQ-004 — Attach-or-create Zellij session
+
+If the named Zellij session exists, the launcher **MUST** attach to it. If it does not exist, the launcher **MUST** create a new attached session from the configured layout. The default Zellij session name **SHOULD** be derived from the most specific available work context: a task/worktree identifier from `TASK.md` when present, otherwise the current Git branch/worktree name when available, otherwise the workspace basename slug. Zejent **MUST** define and document whether pod/container restart is expected to preserve live Zellij tabs through serialization or start a clean layout; implemented behavior **MUST** match that documentation.

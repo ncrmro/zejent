@@ -1,0 +1,23 @@
+#!/bin/bash
+set -euo pipefail
+
+prompt="${1:-}"
+token_file="${GITHUB_TOKEN_FILE:-/run/secrets/github-token}"
+
+read_token() {
+  if [ -r "$token_file" ]; then
+    cat "$token_file"
+  elif [ -n "${GITHUB_TOKEN:-}" ]; then
+    printf '%s\n' "$GITHUB_TOKEN"
+  elif [ -n "${GH_TOKEN:-}" ]; then
+    printf '%s\n' "$GH_TOKEN"
+  else
+    return 1
+  fi
+}
+
+case "$prompt" in
+  *Username*|*username*) printf '%s\n' "x-access-token" ;;
+  *Password*|*password*) read_token ;;
+  *) read_token ;;
+esac

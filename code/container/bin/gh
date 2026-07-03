@@ -1,0 +1,11 @@
+#!/bin/bash
+set -euo pipefail
+
+token_file="${GITHUB_TOKEN_FILE:-/run/secrets/github-token}"
+if [ -z "${GH_TOKEN:-}" ] && [ -z "${GITHUB_TOKEN:-}" ] && [ -r "$token_file" ]; then
+  token="$(cat "$token_file")"
+  export GH_TOKEN="$token"
+  export GITHUB_TOKEN="$token"
+fi
+
+exec gh-real "$@"

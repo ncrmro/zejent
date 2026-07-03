@@ -1,0 +1,20 @@
+theme = "default"
+
+[editor]
+line-number = "absolute"
+mouse = true
+text-width = 120
+
+[editor.soft-wrap]
+enable = true
+wrap-at-text-width = true
+
+[editor.cursor-shape]
+insert = "bar"
+normal = "block"
+select = "underline"
+
+[keys.normal]
+ret = ":write"
+F6 = ["select_all", ":pipe helix-preview-markdown", "collapse_selection"]
+F7 = ":toggle soft-wrap.enable"

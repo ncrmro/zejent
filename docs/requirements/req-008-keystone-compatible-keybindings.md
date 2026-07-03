@@ -1,0 +1,3 @@
+# REQ-008 — Keystone-compatible keybindings
+
+The image **MUST** include source-controlled Zellij configuration compatible with the current Keystone terminal workflow, including previous/next tab bindings and Chrome-style `Ctrl+Tab` / `Ctrl+Shift+Tab` where the host terminal passes those keys through. Zejent **MUST** provide a documented detach workflow that preserves the running Zellij session, tabs, and panes across launcher reattach. `Ctrl+Q` **SHOULD** detach from the Zellij session instead of killing or quitting it, so the common escape action does not destroy tabs. Destructive Zellij/session termination **MUST** remain explicit and **MUST** be distinguishable from detach in documentation and keybindings.

@@ -1,0 +1,5 @@
+#!/bin/bash
+set -euo pipefail
+
+# Keep the pane open if lazygit exits or the workspace is not a Git repository.
+lazygit || exec zsh -l

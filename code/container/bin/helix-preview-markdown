@@ -1,0 +1,27 @@
+#!/bin/bash
+set -euo pipefail
+
+log="/tmp/helix-preview.log"
+temp_file="$(mktemp)"
+trap 'rm -f "$temp_file"' EXIT
+
+cat > "$temp_file"
+{
+  printf -- '--- %s ---\n' "$(date)"
+  if pandoc -f markdown "$temp_file" -o /tmp/helix-preview.html 2>> "$log"; then
+    url="file:///tmp/helix-preview.html"
+    if command -v wl-copy >/dev/null 2>&1; then
+      printf '%s' "$url" | wl-copy || true
+      printf 'Copied to clipboard: %s\n' "$url"
+    else
+      printf 'Preview rendered: %s\n' "$url"
+    fi
+    if command -v xdg-open >/dev/null 2>&1; then
+      xdg-open /tmp/helix-preview.html >/dev/null 2>&1 &
+    fi
+  else
+    printf 'Pandoc failed; see %s\n' "$log" >&2
+  fi
+} >> "$log"
+
+cat "$temp_file"

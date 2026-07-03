@@ -1,0 +1,10 @@
+#!/bin/bash
+set -euo pipefail
+
+if [[ -n "${LEADER_AGENT_CMD:-}" ]]; then
+  exec zsh -lc "$LEADER_AGENT_CMD"
+fi
+
+exec outfitter run --profile zejent -- \
+  --session-id "${PI_SESSION_ID:-zejent}" \
+  --name "${PI_SESSION_NAME:-zejent}"

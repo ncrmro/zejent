@@ -1,0 +1,21 @@
+layout {
+    tab name="lazy-git" {
+        pane command="/bin/zejent-lazygit-pane"
+        compact_bar size=1
+    }
+
+    tab name="leader-agent" focus=true {
+        pane command="/bin/zejent-leader-agent-pane"
+        compact_bar size=1
+    }
+
+    pane_template name="compact_bar" {
+        borderless true
+        plugin location="compact-bar"
+    }
+
+    new_tab_template {
+        pane
+        compact_bar size=1
+    }
+}

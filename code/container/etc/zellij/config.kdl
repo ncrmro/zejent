@@ -1,0 +1,37 @@
+// Mirrored from Keystone's terminal zellij bindings:
+// /home/ncrmro/repos/ncrmro/keystone/modules/terminal/shell.nix
+// Chrome-style tab movement is included for terminals that pass it through:
+// Ctrl+Tab for next, Ctrl+Shift+Tab for previous.
+startup_tips false
+pane_frames false
+session_serialization false
+support_kitty_keyboard_protocol true
+
+keybinds {
+    normal {
+        // Previous tab
+        bind "Ctrl ," { GoToPreviousTab; }
+        bind "Ctrl PageUp" { GoToPreviousTab; }
+        bind "Ctrl Shift Tab" { GoToPreviousTab; }
+
+        // Next tab
+        bind "Ctrl ." { GoToNextTab; }
+        bind "Ctrl PageDown" { GoToNextTab; }
+        bind "Ctrl Tab" { GoToNextTab; }
+
+        // Move current tab
+        bind "Ctrl <" { MoveTab "Left"; }
+        bind "Ctrl >" { MoveTab "Right"; }
+
+        // Browser-like tab lifecycle
+        bind "Ctrl t" { NewTab; }
+        bind "Ctrl w" { CloseTab; }
+
+        // Keep Ctrl+G/Ctrl+O available for agents/lazygit; use shifted
+        // variants for Zellij modes, as in Keystone.
+        unbind "Ctrl g"
+        bind "Ctrl Shift g" { SwitchToMode "locked"; }
+        unbind "Ctrl o"
+        bind "Ctrl Shift o" { SwitchToMode "session"; }
+    }
+}

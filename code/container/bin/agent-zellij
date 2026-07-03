@@ -1,0 +1,19 @@
+#!/bin/bash
+set -euo pipefail
+
+# Attach to the named Zellij session when it exists; otherwise create a fresh
+# session from the agent layout. Keep this script inside the image so the host
+# launcher only has to exec one stable command.
+
+session_name="${AGENT_ZELLIJ_SESSION_NAME:-agent}"
+config_path="${ZELLIJ_CONFIG_FILE:-/etc/zellij/config.kdl}"
+layout_path="${ZELLIJ_LAYOUT_FILE:-/etc/zellij/agent-layout.kdl}"
+
+if zellij --config "$config_path" list-sessions --short --no-formatting 2>/dev/null \
+  | grep -Fxq "$session_name"; then
+  exec zellij --config "$config_path" attach "$session_name"
+fi
+
+exec zellij --config "$config_path" \
+  --session "$session_name" \
+  --new-session-with-layout "$layout_path"

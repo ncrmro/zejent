@@ -1,0 +1,14 @@
+{
+  "packages": [
+    "npm:pi-inspect"
+  ],
+  "npmCommand": [
+    "/bin/bash",
+    "-lc",
+    "exec npm \"$@\"",
+    "npm"
+  ],
+  "images": {
+    "blockImages": false
+  }
+}
