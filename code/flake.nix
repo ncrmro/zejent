@@ -160,6 +160,15 @@
               # zsh reads the plain text file from container/etc/zshenv.
               rm -f etc/zshenv.zwc etc/zshenv_zwc_is_used
 
+              # containerd 2.x CRI (k3s/k8s) resolves the image's /etc/passwd
+              # and /etc/group with openat2, which rejects the absolute
+              # /nix/store symlinks buildEnv produces ("path escapes from
+              # parent"). Ship them as regular files instead.
+              rm -f etc/passwd etc/group
+              cp ${pkgs.dockerTools.fakeNss}/etc/passwd etc/passwd
+              cp ${pkgs.dockerTools.fakeNss}/etc/group etc/group
+              chmod 0644 etc/passwd etc/group
+
               mkdir -p tmp root/.config/gh root/.outfitter workspace
               if [ -d ${containerFiles}/root ]; then
                 cp -R ${containerFiles}/root/. root/
