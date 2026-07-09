@@ -8,6 +8,11 @@
   "workspaceMount": "type=bind,source=${localWorkspaceFolder},target=${localWorkspaceFolder}",
   "workspaceFolder": "${localWorkspaceFolder}",
   "remoteUser": "vscode",
+  "features": {
+    "ghcr.io/devcontainers/features/sshd:1": {
+      "version": "latest"
+    }
+  },
   "mounts": [
     "source=zejent-${localWorkspaceFolderBasename}-tmp,target=/tmp,type=volume"
   ],
