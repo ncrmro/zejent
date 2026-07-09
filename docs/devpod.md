@@ -52,6 +52,8 @@ plain DevPod fallback config:
 - `/tmp` is a named volume (`zejent-${localWorkspaceFolderBasename}-tmp`) so
   Pi runtime state, Zellij sockets/cache, and serialized session metadata can
   survive DevPod stop/start and container recreation.
+- The Dev Containers `sshd` feature is enabled so `gh codespace ssh` can connect
+  into the Zejent image.
 - `AGENT_ZELLIJ_SESSION_NAME` defaults to the workspace basename so `agent-zellij`
   attaches to a stable session name.
 
