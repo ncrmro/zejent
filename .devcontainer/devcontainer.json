@@ -1,6 +1,7 @@
 {
   "name": "Zejent",
   "image": "ghcr.io/ncrmro/zejent:latest",
+  "initializeCommand": "sh -lc 'if [ -n \"${GITHUB_TOKEN:-}\" ]; then printf %s \"$GITHUB_TOKEN\" | docker login ghcr.io -u ncrmro --password-stdin >/dev/null 2>&1 || true; fi'",
   "workspaceMount": "type=bind,source=${localWorkspaceFolder},target=${localWorkspaceFolder}",
   "workspaceFolder": "${localWorkspaceFolder}",
   "remoteUser": "root",
