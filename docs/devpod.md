@@ -42,8 +42,11 @@ devpod up . \
 The checked-in `.devcontainer/devcontainer.json` intentionally differs from a
 plain DevPod fallback config:
 
-- `initializeCommand` attempts a non-interactive `docker login ghcr.io` with the
-  Codespaces-provided `GITHUB_TOKEN` before pulling the private Zejent image.
+- `initializeCommand` attempts a non-interactive `docker login ghcr.io` with
+  `GHCR_PAT` (preferred) or the Codespaces-provided `GITHUB_TOKEN` before
+  pulling the private Zejent image. If the package is private, configure a
+  Codespaces user secret named `GHCR_PAT` with `read:packages` access, or make
+  the package visible to this repository.
 - `workspaceMount` binds the checkout to the **same absolute path** inside the
   container, preserving Zejent `REQ-005`.
 - `/tmp` is a named volume (`zejent-${localWorkspaceFolderBasename}-tmp`) so
