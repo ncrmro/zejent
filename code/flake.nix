@@ -5,14 +5,22 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
-  outputs = { nixpkgs, ... }:
+  outputs = { self, nixpkgs, ... }:
     let
       lib = nixpkgs.lib;
       systems = [ "x86_64-linux" "aarch64-linux" ];
       forAllSystems = lib.genAttrs systems;
+      # The image is a Linux artifact. Expose it under the Darwin systems too so
+      # `nix build .#image` works from a Mac; the Linux derivations are then
+      # dispatched to a configured aarch64/x86_64-linux remote builder.
+      darwinToLinux = {
+        "aarch64-darwin" = "aarch64-linux";
+        "x86_64-darwin" = "x86_64-linux";
+      };
     in
     {
-      packages = forAllSystems (system:
+      packages = lib.mapAttrs (_darwin: linux: self.packages.${linux}) darwinToLinux
+        // forAllSystems (system:
         let
           pkgs = import nixpkgs { inherit system; };
 
@@ -29,7 +37,7 @@
 
             outputHashMode = "recursive";
             outputHashAlgo = "sha256";
-            outputHash = "sha256-BEIk2RCvCp64BTKUrvF55vSzByt5eu9kXNae4io+3rE=";
+            outputHash = "sha256-geEn6ehopLkU5eqTXtfq+wm3sT9ucROh7TxD4c2jEOw=";
 
             buildCommand = ''
               export HOME="$TMPDIR/home"
@@ -133,6 +141,7 @@
             pkgs.wl-clipboard
             pkgs.xdg-utils
             pkgs.yaml-language-server
+            pkgs.yazi
             pkgs.zk
             pkgs.zellij
             pkgs.zsh
