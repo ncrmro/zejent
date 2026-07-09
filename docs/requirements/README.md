@@ -17,5 +17,6 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **
 - [REQ-009 — Container runtime and credentials](req-009-container-runtime-and-credentials.md)
 - [REQ-010 — Observable operations](req-010-observable-operations.md)
 - [REQ-011 — Published image](req-011-published-image.md)
+- [REQ-012 — Portable runtimes and macOS hosts](req-012-portable-runtimes-and-macos.md)
 
 Requirements originated from the 2026-06-30 podman-nix-zellij-session spike (draft v0.2) and carry forward its prototype plus session-preservation and Outfitter/Pi persistence findings.
