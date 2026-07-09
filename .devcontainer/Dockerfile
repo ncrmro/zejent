@@ -11,6 +11,11 @@ RUN set -eux; \
     ln -sf /bin/ssh /usr/bin/ssh; \
     ln -sf /bin/ssh-keygen /usr/bin/ssh-keygen; \
     ln -sf /bin/sshd /usr/sbin/sshd; \
+    sed -i 's|^root:[^:]*:0:0:[^:]*:[^:]*:.*$|root:x:0:0:root:/root:/bin/bash|' /etc/passwd; \
+    grep -q '^vscode:' /etc/group || printf '%s\n' 'vscode:x:1000:' >> /etc/group; \
+    grep -q '^vscode:' /etc/passwd || printf '%s\n' 'vscode:x:1000:1000:VS Code:/home/vscode:/bin/bash' >> /etc/passwd; \
+    mkdir -p /home/vscode/.ssh; \
+    chown -R 1000:1000 /home/vscode; \
     grep -q '^sshd:' /etc/group || printf '%s\n' 'sshd:x:74:' >> /etc/group; \
     grep -q '^sshd:' /etc/passwd || printf '%s\n' 'sshd:x:74:74:Privilege-separated SSH:/var/empty:/bin/false' >> /etc/passwd; \
     rm -rf /etc/ssh; \
