@@ -4,6 +4,11 @@ layout {
         compact_bar size=1
     }
 
+    tab name="explorer" {
+        pane command="yazi"
+        compact_bar size=1
+    }
+
     tab name="leader-agent" focus=true {
         pane command="/bin/zejent-leader-agent-pane"
         compact_bar size=1
