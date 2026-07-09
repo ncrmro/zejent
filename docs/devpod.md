@@ -42,17 +42,17 @@ devpod up . \
 The checked-in `.devcontainer/devcontainer.json` intentionally differs from a
 plain DevPod fallback config:
 
-- It builds a thin Codespaces/devcontainer overlay from
-  `ghcr.io/ncrmro/zejent:latest`, then copies the branch's `agent-zellij` and
-  Zellij config into the image so PR changes can be tested before `latest` is
-  rebuilt from `main`.
+- It builds a Codespaces/devcontainer overlay from the standard Ubuntu Dev
+  Containers base, copies Zejent's Nix closure from `ghcr.io/ncrmro/zejent:latest`,
+  and overlays the branch's `agent-zellij` plus Zellij config so PR changes can
+  be tested before `latest` is rebuilt from `main`.
 - `initializeCommand` attempts a non-interactive `docker login ghcr.io` with
   `GHCR_PAT` (preferred) or the Codespaces-provided `GITHUB_TOKEN` before
   pulling the private Zejent base image. If the package is private, configure a
   Codespaces user secret named `GHCR_PAT` with `read:packages` access, or make
   the package visible to this repository.
-- The overlay adds the FHS paths and SSH host config Codespaces expects, so
-  `gh codespace ssh` can connect to the Nix-built image.
+- The Ubuntu Dev Containers base keeps Codespaces' SSH integration working;
+  Zejent tools are exposed through `/usr/local/zejent-bin`.
 - `workspaceMount` binds the checkout to the **same absolute path** inside the
   container, preserving Zejent `REQ-005`.
 - `/tmp` is a named volume (`zejent-${localWorkspaceFolderBasename}-tmp`) so

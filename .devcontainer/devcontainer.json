@@ -7,8 +7,7 @@
   "initializeCommand": "sh -lc 'token=\"${GHCR_PAT:-${GITHUB_TOKEN:-}}\"; if [ -n \"$token\" ]; then printf %s \"$token\" | docker login ghcr.io -u ncrmro --password-stdin >/dev/null 2>&1 || true; fi'",
   "workspaceMount": "type=bind,source=${localWorkspaceFolder},target=${localWorkspaceFolder}",
   "workspaceFolder": "${localWorkspaceFolder}",
-  "remoteUser": "root",
-  "overrideCommand": false,
+  "remoteUser": "vscode",
   "mounts": [
     "source=zejent-${localWorkspaceFolderBasename}-tmp,target=/tmp,type=volume"
   ],
