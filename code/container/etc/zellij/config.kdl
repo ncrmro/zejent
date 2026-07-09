@@ -4,7 +4,10 @@
 // Ctrl+Tab for next, Ctrl+Shift+Tab for previous.
 startup_tips false
 pane_frames false
-session_serialization false
+// Serialize enough session metadata for agent-zellij to resurrect the layout
+// after a container restart. Zejent stores XDG_CACHE_HOME under the persistent
+// /tmp volume, so this survives Podman pod recreation and DevPod stop/start.
+session_serialization true
 support_kitty_keyboard_protocol true
 
 keybinds {

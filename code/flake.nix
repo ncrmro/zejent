@@ -189,6 +189,7 @@
                 "EDITOR=hx"
                 "VISUAL=hx"
                 "XDG_CONFIG_HOME=/root/.config"
+                "XDG_CACHE_HOME=/tmp/.cache"
                 "SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.crt"
                 "NIX_SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.crt"
                 "GITHUB_TOKEN_FILE=/run/secrets/github-token"
