@@ -1,0 +1,23 @@
+{
+  "name": "Zejent",
+  "image": "ghcr.io/ncrmro/zejent:latest",
+  "workspaceMount": "type=bind,source=${localWorkspaceFolder},target=${localWorkspaceFolder}",
+  "workspaceFolder": "${localWorkspaceFolder}",
+  "remoteUser": "root",
+  "mounts": [
+    "source=zejent-${localWorkspaceFolderBasename}-tmp,target=/tmp,type=volume"
+  ],
+  "containerEnv": {
+    "AGENT_ZELLIJ_SESSION_NAME": "${localWorkspaceFolderBasename}",
+    "PI_SESSION_DIR": "/tmp/pi-sessions",
+    "ZELLIJ_CONFIG_FILE": "/etc/zellij/config.kdl",
+    "ZELLIJ_LAYOUT_FILE": "/etc/zellij/agent-layout.kdl"
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh"
+      }
+    }
+  }
+}

@@ -8,10 +8,19 @@ set -euo pipefail
 session_name="${AGENT_ZELLIJ_SESSION_NAME:-agent}"
 config_path="${ZELLIJ_CONFIG_FILE:-/etc/zellij/config.kdl}"
 layout_path="${ZELLIJ_LAYOUT_FILE:-/etc/zellij/agent-layout.kdl}"
+cache_home="${XDG_CACHE_HOME:-$HOME/.cache}"
+serialized_session_dir="$cache_home/zellij/contract_version_1/session_info/$session_name"
 
 if zellij --config "$config_path" list-sessions --short --no-formatting 2>/dev/null \
   | grep -Fxq "$session_name"; then
   exec zellij --config "$config_path" attach "$session_name"
+fi
+
+# When session serialization is enabled and XDG_CACHE_HOME is persisted, Zellij
+# can resurrect a dead session after container stop/recreate. Use the saved
+# metadata only when it exists so first-run sessions still use Zejent's layout.
+if [[ -d "$serialized_session_dir" ]]; then
+  exec zellij --config "$config_path" attach --create --force-run-commands "$session_name"
 fi
 
 exec zellij --config "$config_path" \

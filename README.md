@@ -33,6 +33,12 @@ code/build-image.sh --update            # optionally --outfitter-version X.Y.Z
 code/run-image.sh --replace /path/to/workspace
 ```
 
+## DevPod compatibility
+
+Zejent includes an optional `.devcontainer/devcontainer.json` for DevPod / Dev Containers tooling. The default local workflow remains `code/run-image.sh`; the DevPod config is a compatibility shim that preserves Zejent's same-absolute-path workspace mount and uses a named `/tmp` volume so Zellij session metadata can be resurrected after DevPod stop/start.
+
+See [`docs/devpod.md`](docs/devpod.md) for Podman provider setup, local image overrides, and known gaps versus the Zejent launcher.
+
 ## Published image
 
 Pushes to `main` build the image with `nix build ./code#image` and copy it to `ghcr.io/ncrmro/zejent:latest` with skopeo. The local scripts still use the `localhost/nix-zellij-agent:dev` tag; the published image is the same artifact under the registry tag.
