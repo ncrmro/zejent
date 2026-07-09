@@ -67,3 +67,6 @@ RUN set -eux; \
 COPY code/container/bin/agent-zellij /bin/agent-zellij
 COPY code/container/etc/zellij/ /etc/zellij/
 RUN chmod 0755 /bin/agent-zellij
+
+ENTRYPOINT ["/usr/local/share/ssh-init.sh"]
+CMD ["/bin/sleep", "infinity"]

@@ -8,6 +8,7 @@
   "workspaceMount": "type=bind,source=${localWorkspaceFolder},target=${localWorkspaceFolder}",
   "workspaceFolder": "${localWorkspaceFolder}",
   "remoteUser": "root",
+  "overrideCommand": false,
   "mounts": [
     "source=zejent-${localWorkspaceFolderBasename}-tmp,target=/tmp,type=volume"
   ],
