@@ -44,6 +44,8 @@ IMAGE_REF="${ZEJENT_IMAGE_REF:-localhost/nix-zellij-agent:dev}"
 ZEJENT_UPDATE=0
 FORCE_RECREATE=0
 REPLACE_SECRET=0
+SYNC_ONLY=0
+NO_ATTACH=0
 OUTFITTER_VERSION=""
 
 usage() {
@@ -58,6 +60,11 @@ Options:
   --outfitter-version VERSION Pin @ai-outfitter/outfitter to VERSION during --update instead of latest.
   --replace                   Recreate this workspace pod before attaching.
   --replace-secret            Replace the Podman GitHub token secret before attaching.
+  --sync-only                 Materialize Outfitter profiles/prompts and exit without
+                              touching the pod or attaching (running panes pick up the
+                              files through the /root/.outfitter mount).
+  --no-attach                 Ensure the pod is running, then exit instead of attaching
+                              (for editors/automation that connect on their own).
   -h, --help                  Show this help.
 EOF
 }
@@ -86,6 +93,14 @@ while [[ $# -gt 0 ]]; do
       ;;
     --replace-secret)
       REPLACE_SECRET=1
+      shift
+      ;;
+    --sync-only)
+      SYNC_ONLY=1
+      shift
+      ;;
+    --no-attach)
+      NO_ATTACH=1
       shift
       ;;
     -h|--help)
@@ -295,9 +310,8 @@ cp "$OUTFITTER_SOURCE_DIR/prompts/zejent/SYSTEM.md" "$outfitter_root_dir/prompts
 # Keep Zejent startup resilient by using Pi's fragment-style git ref syntax
 # instead of treating @main as part of the GitHub repository path.
 find "$outfitter_root_dir/profiles" -name profile.yml -type f -print0 \
-  | xargs -0 -r sed -i \
-      -e 's|git:github.com/ai-outfitter/deepwork@fix/post-commit-review-reminder|git:github.com/ai-outfitter/deepwork#main|g' \
-      -e 's|git:github.com/ai-outfitter/deepwork@main|git:github.com/ai-outfitter/deepwork#main|g'
+  | xargs -0 -r perl -pi -e \
+      's|git:github\.com/ai-outfitter/deepwork\@fix/post-commit-review-reminder|git:github.com/ai-outfitter/deepwork#main|g; s|git:github\.com/ai-outfitter/deepwork\@main|git:github.com/ai-outfitter/deepwork#main|g'
 
 # Outfitter 0.7+ treats raw append_system_prompt strings as literal text and
 # warns when they look like paths. Convert Link/Zejent path-style prompt entries
@@ -314,6 +328,11 @@ profile_export: true
 profile_sources:
   - path: /root/.outfitter/profiles
 OUTFITTER_SETTINGS
+
+if [[ "$SYNC_ONLY" == "1" ]]; then
+  printf 'synced Outfitter profiles/prompts to %s\n' "$outfitter_root_dir" >&2
+  exit 0
+fi
 
 read_secret_from_tty() {
   local prompt="$1"
@@ -553,6 +572,11 @@ exec_env_args=(
 
 printf 'workspace: %s\nwork context: %s\npod: %s\ncontainer: %s\nzellij session: %s\nkube yaml: %s\noutfitter root: %s -> %s\nzejent profile: %s -> %s\ngithub secret: %s\npi home: %s -> %s (read-only)\ntmp volume: %s -> %s\npi session dir: %s\npi session id: %s\npi session name: %s\n' \
   "$WORKSPACE" "$WORK_CONTEXT_SLUG" "$POD_NAME" "$CONTAINER_NAME" "$SESSION_NAME" "$POD_YAML" "$outfitter_root_dir" "/root/.outfitter" "$OUTFITTER_SOURCE_DIR/profiles/zejent.yml" "/root/.outfitter/profiles/zejent.yml" "$GITHUB_TOKEN_SECRET" "$PI_HOME_DIR" "/root/.pi" "$TMP_VOLUME_NAME" "/tmp" "$PI_SESSION_DIR" "$PI_SESSION_ID" "$PI_SESSION_NAME" >&2
+
+if [[ "$NO_ATTACH" == "1" ]]; then
+  printf 'pod %s is running; attach later with: %s %s\n' "$POD_NAME" "$0" "$WORKSPACE" >&2
+  exit 0
+fi
 
 saved_tty=""
 if [[ -t 0 ]]; then

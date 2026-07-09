@@ -96,9 +96,8 @@ update_outfitter_pin() {
   nix flake update "${NIX_FLAGS[@]}" --flake "$SCRIPT_DIR"
 
   echo "pinning @ai-outfitter/outfitter $current_version -> $target_version" >&2
-  sed -i -E \
-    -e "s|@ai-outfitter/outfitter@[0-9][^[:space:]\\]*|@ai-outfitter/outfitter@$target_version|" \
-    -e 's|outputHash = "sha256-[^"]+";|outputHash = lib.fakeHash;|' \
+  TARGET_VERSION="$target_version" perl -pi -e \
+    's|\@ai-outfitter/outfitter\@[0-9][^\s\\]*|\@ai-outfitter/outfitter\@$ENV{TARGET_VERSION}|; s|outputHash = "sha256-[^"]+";|outputHash = lib.fakeHash;|' \
     "$SCRIPT_DIR/flake.nix"
 
   hash_log="$(mktemp -t zejent-npm-hash.XXXXXX.log)"
@@ -121,7 +120,7 @@ update_outfitter_pin() {
   rm -f "$hash_log"
 
   echo "pinning npm fixed-output hash: $new_hash" >&2
-  sed -i -E "s|outputHash = lib.fakeHash;|outputHash = \"$new_hash\";|" "$SCRIPT_DIR/flake.nix"
+  NEW_HASH="$new_hash" perl -pi -e 's|outputHash = lib\.fakeHash;|outputHash = "$ENV{NEW_HASH}";|' "$SCRIPT_DIR/flake.nix"
 }
 
 if [[ "$UPDATE" == "1" ]]; then
