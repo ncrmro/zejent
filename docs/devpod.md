@@ -42,18 +42,22 @@ devpod up . \
 The checked-in `.devcontainer/devcontainer.json` intentionally differs from a
 plain DevPod fallback config:
 
+- It builds a thin Codespaces/devcontainer overlay from
+  `ghcr.io/ncrmro/zejent:latest`, then copies the branch's `agent-zellij` and
+  Zellij config into the image so PR changes can be tested before `latest` is
+  rebuilt from `main`.
 - `initializeCommand` attempts a non-interactive `docker login ghcr.io` with
   `GHCR_PAT` (preferred) or the Codespaces-provided `GITHUB_TOKEN` before
-  pulling the private Zejent image. If the package is private, configure a
+  pulling the private Zejent base image. If the package is private, configure a
   Codespaces user secret named `GHCR_PAT` with `read:packages` access, or make
   the package visible to this repository.
+- The overlay adds the FHS paths and SSH host config Codespaces expects, so
+  `gh codespace ssh` can connect to the Nix-built image.
 - `workspaceMount` binds the checkout to the **same absolute path** inside the
   container, preserving Zejent `REQ-005`.
 - `/tmp` is a named volume (`zejent-${localWorkspaceFolderBasename}-tmp`) so
   Pi runtime state, Zellij sockets/cache, and serialized session metadata can
   survive DevPod stop/start and container recreation.
-- The Dev Containers `sshd` feature is enabled so `gh codespace ssh` can connect
-  into the Zejent image.
 - `AGENT_ZELLIJ_SESSION_NAME` defaults to the workspace basename so `agent-zellij`
   attaches to a stable session name.
 
