@@ -154,6 +154,16 @@ EOF
 fi
 IMAGE_ID="$(podman image inspect -f '{{.Id}}' "$IMAGE_REF")"
 
+# Zellij, Pi (node), and npm-installed extensions are memory hungry. On a
+# too-small podman machine the kernel OOM killer SIGKILLs container processes:
+# the attach dies with exit 137 and, before the tty trap existed, left mouse
+# reporting enabled in the host terminal. Warn early instead of dying weirdly.
+podman_mem_bytes="$(podman info --format '{{.Host.MemTotal}}' 2>/dev/null || echo 0)"
+if [[ "$podman_mem_bytes" =~ ^[0-9]+$ && "$podman_mem_bytes" -gt 0 && "$podman_mem_bytes" -lt $((6 * 1024 * 1024 * 1024)) ]]; then
+  printf 'warning: container host has only %s MiB memory; Zellij/Pi may be OOM-killed (exit 137).\n' "$((podman_mem_bytes / 1024 / 1024))" >&2
+  printf 'warning: on macOS grow it with: podman machine stop && podman machine set --memory 8192 && podman machine start\n' >&2
+fi
+
 WORKSPACE="$(cd -- "$WORKSPACE_INPUT" && pwd -P)"
 workspace_base="${WORKSPACE##*/}"
 slugify() {
@@ -594,12 +604,17 @@ cleanup_tty() {
   else
     stty sane 2>/dev/null || true
   fi
-  printf '\033[?1049l\033[?25h\033[0m' >&2
+  # Zellij enables mouse tracking (?1000/?1002/?1003 + SGR ?1006/?1015),
+  # focus events (?1004), bracketed paste (?2004), and the kitty keyboard
+  # protocol. If the client dies uncleanly (e.g. SIGKILL under memory
+  # pressure) those modes survive in the host terminal and mouse drags spew
+  # escape garbage. Disable them all alongside the alt-screen/cursor reset.
+  printf '\033[<u\033[?1000l\033[?1002l\033[?1003l\033[?1005l\033[?1006l\033[?1015l\033[?1004l\033[?2004l\033[?1049l\033[?25h\033[0m' >&2
 
-  trap - EXIT INT TERM
+  trap - EXIT INT TERM HUP
   exit "$exit_code"
 }
-trap cleanup_tty EXIT INT TERM
+trap cleanup_tty EXIT INT TERM HUP
 
 podman exec -it \
   --workdir "$WORKSPACE" \
