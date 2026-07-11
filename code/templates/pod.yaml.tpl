@@ -15,6 +15,12 @@ spec:
       image: __IMAGE_REF__
       imagePullPolicy: Never
       command: ["/bin/bash", "-lc", "chmod 1777 /tmp && exec sleep infinity"]
+      env:
+        # Extension installs run on every launch (composite profiles are
+        # ephemeral by design); a persistent npm cache on the /tmp volume
+        # keeps them fast and network-light across container restarts.
+        - name: npm_config_cache
+          value: /tmp/npm-cache
       workingDir: __WORKSPACE_Q__
       volumeMounts:
         - name: workspace
@@ -24,6 +30,11 @@ spec:
         - name: pi-home
           mountPath: /root/.pi
           readOnly: true
+        # pi-inspect hardcodes ~/.pi/agent/inspect for its request queue.
+        # Shadow just that subtree with a writable volume so the extension
+        # loads while host Pi credentials stay read-only (REQ-009).
+        - name: pi-inspect
+          mountPath: /root/.pi/agent/inspect
         - name: tmp
           mountPath: /tmp
 __GITHUB_TOKEN_VOLUME_MOUNT__
@@ -43,4 +54,6 @@ __GITHUB_TOKEN_VOLUME_MOUNT__
     - name: tmp
       persistentVolumeClaim:
         claimName: __TMP_VOLUME_NAME__
+    - name: pi-inspect
+      emptyDir: {}
 __GITHUB_TOKEN_VOLUME__

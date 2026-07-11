@@ -12,6 +12,8 @@ Graduated from the 2026-06-30 `podman-nix-zellij-session` spike.
 
 ## Quickstart
 
+`make help` lists one-command test environments: `make dev` (terminal attach), `make vscode` (VS Code attached to the container), `make codespace` (GitHub Codespaces), and `make kind` (Kubernetes smoke test in a local kind cluster).
+
 Build and load the image into local Podman:
 
 ```bash
@@ -32,6 +34,33 @@ Update flake inputs, bump Outfitter, rebuild, and recreate the workspace pod:
 code/build-image.sh --update            # optionally --outfitter-version X.Y.Z
 code/run-image.sh --replace /path/to/workspace
 ```
+
+## macOS
+
+The image is an `aarch64-linux`/`x86_64-linux` OCI artifact; on a Mac both building and running go through lightweight Linux VMs, same as any container tooling (REQ-012).
+
+Runtime — Podman with a machine VM (mounts `/Users`, so workspace paths match the host):
+
+```bash
+brew install podman vfkit
+podman machine init --now
+```
+
+Image — the lowest-friction option is pulling the published image and retagging it:
+
+```bash
+podman pull ghcr.io/ncrmro/zejent:latest
+podman tag ghcr.io/ncrmro/zejent:latest localhost/nix-zellij-agent:dev
+```
+
+Building locally with `code/build-image.sh` instead requires an `aarch64-linux` Nix builder — e.g. the managed VM from `nix run nixpkgs#darwin.linux-builder` — plus your user in the daemon's `trusted-users` so the `builders` setting is honored:
+
+```bash
+echo "trusted-users = $USER" | sudo tee -a /etc/nix/nix.conf
+sudo launchctl kickstart -k system/org.nixos.nix-daemon
+```
+
+Apple's Containerization framework (`container` CLI, macOS 26+) loads the image as a standard OCI archive, but the launcher currently depends on Podman-specific features (`play kube`, secrets); see REQ-012 for the support path.
 
 ## Published image
 

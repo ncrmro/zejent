@@ -3,10 +3,12 @@ label: Zejent container leader
 description: Leader profile for the Zejent Podman/Nix/Zellij agent container.
 inherits:
   - founder
-# Host /root/.pi is mounted read-only for credentials. Do not symlink writable
-# runtime/package/session trees from the composite profile back into /root/.pi;
-# let Pi create them under the writable composite profile and use
-# PI_CODING_AGENT_SESSION_DIR=/tmp/pi-sessions for durable sessions.
+# Host /root/.pi is mounted read-only for credentials. The symlink strategy
+# would persist these trees to the native ~/.pi locations (EROFS here), so
+# they stay discard: composite profiles are rebuilt each launch. Restart cost
+# is kept low by a persistent npm cache (npm_config_cache=/tmp/npm-cache on
+# the durable /tmp volume) plus --prefer-offline in the Pi npmCommand.
+# Durable sessions live in PI_CODING_AGENT_SESSION_DIR=/tmp/pi-sessions.
 state_persistence:
   plugins/: discard
   tmp/: discard

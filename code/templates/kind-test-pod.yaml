@@ -1,0 +1,24 @@
+# Minimal pod for smoke-testing the image on Kubernetes (kind). No workspace
+# hostPath or GitHub secret: it validates that the image runs under a CRI
+# runtime (REQ-012) and that agent-zellij attach-or-create works via
+# `kubectl exec`. Used by `make kind`.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: zejent-kind
+  labels:
+    dev.ncrmro.agent.kind: nix-zellij-kind-test
+spec:
+  restartPolicy: Never
+  containers:
+    - name: zejent
+      image: localhost/nix-zellij-agent:dev
+      imagePullPolicy: Never
+      command: ["/bin/bash", "-lc", "chmod 1777 /tmp && exec sleep infinity"]
+      workingDir: /workspace
+      volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+  volumes:
+    - name: tmp
+      emptyDir: {}

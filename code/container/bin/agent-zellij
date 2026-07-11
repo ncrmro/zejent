@@ -1,19 +1,20 @@
 #!/bin/bash
 set -euo pipefail
 
-# Attach to the named Zellij session when it exists; otherwise create a fresh
-# session from the agent layout. Keep this script inside the image so the host
-# launcher only has to exec one stable command.
+# Attach to the named Zellij session, creating it headless from the agent
+# layout first when missing. Creating with --create-background means no client
+# (this one included) owns the session's initial size, so later attaches never
+# have to kick another client or accept its resolution. Keep this script inside
+# the image so the host launcher only has to exec one stable command.
 
 session_name="${AGENT_ZELLIJ_SESSION_NAME:-agent}"
 config_path="${ZELLIJ_CONFIG_FILE:-/etc/zellij/config.kdl}"
 layout_path="${ZELLIJ_LAYOUT_FILE:-/etc/zellij/agent-layout.kdl}"
 
-if zellij --config "$config_path" list-sessions --short --no-formatting 2>/dev/null \
+if ! zellij --config "$config_path" list-sessions --short --no-formatting 2>/dev/null \
   | grep -Fxq "$session_name"; then
-  exec zellij --config "$config_path" attach "$session_name"
+  zellij --config "$config_path" attach --create-background "$session_name" \
+    options --default-layout "$layout_path"
 fi
 
-exec zellij --config "$config_path" \
-  --session "$session_name" \
-  --new-session-with-layout "$layout_path"
+exec zellij --config "$config_path" attach "$session_name"

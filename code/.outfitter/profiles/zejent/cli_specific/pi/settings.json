@@ -5,7 +5,7 @@
   "npmCommand": [
     "/bin/bash",
     "-lc",
-    "exec npm \"$@\"",
+    "exec npm --prefer-offline \"$@\"",
     "npm"
   ],
   "images": {
