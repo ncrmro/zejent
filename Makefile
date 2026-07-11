@@ -24,6 +24,18 @@ dev: ## Terminal: launch/attach the workspace pod + Zellij session
 	@podman image exists $(IMAGE) || $(MAKE) image
 	code/run-image.sh $(RUN_ARGS) $(WORKSPACE)
 
+test: ## Smoke test: Pi starts inside the pod and answers a prompt
+	@podman image exists $(IMAGE) || $(MAKE) image
+	code/run-image.sh --no-attach $(RUN_ARGS) $(WORKSPACE)
+	@slug=$$(basename "$(WORKSPACE)" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9-' '-' | sed -E 's/^-+//; s/-+$$//; s/-+/-/g'); \
+	echo "asking Pi for a reply in zejent-$$slug…"; \
+	out=$$(podman exec --workdir "$(WORKSPACE)" "zejent-$$slug" \
+	  sh -lc 'outfitter run --profile zejent -- --no-session -p "Reply with exactly: ZEJENT-OK"' 2>&1); \
+	printf '%s\n' "$$out" | tail -3; \
+	printf '%s\n' "$$out" | grep -q "ZEJENT-OK" \
+	  && echo "PASS: Pi responded" \
+	  || { echo "FAIL: Pi did not respond (full output above tail: rerun with RUN_ARGS=--replace after image changes)"; exit 1; }
+
 vscode: ## VS Code: open this repo in its local dev container (.devcontainer, no Codespaces)
 	@podman image exists ghcr.io/ncrmro/zejent:latest || \
 	  { podman image exists $(IMAGE) && podman tag $(IMAGE) ghcr.io/ncrmro/zejent:latest; } || true

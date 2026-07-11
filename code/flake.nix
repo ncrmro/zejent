@@ -37,7 +37,7 @@
 
             outputHashMode = "recursive";
             outputHashAlgo = "sha256";
-            outputHash = "sha256-geEn6ehopLkU5eqTXtfq+wm3sT9ucROh7TxD4c2jEOw=";
+            outputHash = "sha256-vszMYcsKq1kRF2cry6jawLoZ78uYBXtoSRxVAQFJx/s=";
 
             buildCommand = ''
               export HOME="$TMPDIR/home"
@@ -47,8 +47,8 @@
               mkdir -p "$HOME" "$out"
 
               npm install --global --prefix "$out" --ignore-scripts \
-                @earendil-works/pi-coding-agent@0.80.2 \
-                @ai-outfitter/outfitter@0.7.2 \
+                @earendil-works/pi-coding-agent@0.80.5 \
+                @ai-outfitter/outfitter@0.9.0 \
                 ajv@8.17.1 \
                 yaml@2.8.1
 
