@@ -24,17 +24,27 @@ dev: ## Terminal: launch/attach the workspace pod + Zellij session
 	@podman image exists $(IMAGE) || $(MAKE) image
 	code/run-image.sh $(RUN_ARGS) $(WORKSPACE)
 
+# Note: `outfitter run -- -p` currently answers but does not exit afterwards,
+# so the test launches it detached, polls the log for the expected reply, and
+# reaps the lingering process either way.
 test: ## Smoke test: Pi starts inside the pod and answers a prompt
 	@podman image exists $(IMAGE) || $(MAKE) image
 	code/run-image.sh --no-attach $(RUN_ARGS) $(WORKSPACE)
 	@slug=$$(basename "$(WORKSPACE)" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9-' '-' | sed -E 's/^-+//; s/-+$$//; s/-+/-/g'); \
-	echo "asking Pi for a reply in zejent-$$slug…"; \
-	out=$$(podman exec --workdir "$(WORKSPACE)" "zejent-$$slug" \
-	  sh -lc 'outfitter run --profile zejent -- --no-session -p "Reply with exactly: ZEJENT-OK"' 2>&1); \
-	printf '%s\n' "$$out" | tail -3; \
-	printf '%s\n' "$$out" | grep -q "ZEJENT-OK" \
-	  && echo "PASS: Pi responded" \
-	  || { echo "FAIL: Pi did not respond (full output above tail: rerun with RUN_ARGS=--replace after image changes)"; exit 1; }
+	c="zejent-$$slug"; log=/tmp/zejent-make-test.log; \
+	echo "asking Pi for a reply in $$c…"; \
+	podman exec "$$c" rm -f "$$log"; \
+	podman exec -d --workdir "$(WORKSPACE)" "$$c" \
+	  sh -lc "outfitter run --profile zejent -- --no-session -p 'Reply with exactly: ZEJENT-OK' > $$log 2>&1"; \
+	pass=0; \
+	for i in $$(seq 1 60); do \
+	  podman exec "$$c" grep -q "ZEJENT-OK" "$$log" 2>/dev/null && { pass=1; break; }; \
+	  sleep 5; \
+	done; \
+	podman exec "$$c" bash -c 'for d in /proc/[0-9]*; do case "$$(tr "\0" " " < "$$d/cmdline" 2>/dev/null)" in *no-session*ZEJENT-OK*) kill "$${d\#/proc/}" 2>/dev/null;; esac; done; true'; \
+	podman exec "$$c" tail -3 "$$log"; \
+	[ "$$pass" = "1" ] && echo "PASS: Pi responded" \
+	  || { echo "FAIL: Pi did not answer within 5 minutes"; exit 1; }
 
 vscode: ## VS Code: open this repo in its local dev container (.devcontainer, no Codespaces)
 	@podman image exists ghcr.io/ncrmro/zejent:latest || \
